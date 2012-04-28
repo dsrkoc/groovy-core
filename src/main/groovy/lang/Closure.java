@@ -19,6 +19,7 @@ import org.codehaus.groovy.reflection.ReflectionCache;
 import org.codehaus.groovy.reflection.stdclasses.CachedClosureClass;
 import org.codehaus.groovy.runtime.ComposedClosure;
 import org.codehaus.groovy.runtime.CurriedClosure;
+import org.codehaus.groovy.runtime.ClosureCurried;
 import org.codehaus.groovy.runtime.InvokerHelper;
 import org.codehaus.groovy.runtime.memoize.LRUCache;
 import org.codehaus.groovy.runtime.memoize.Memoize;
@@ -612,6 +613,14 @@ public abstract class Closure<V> extends GroovyObjectSupport implements Cloneabl
      */
     public Closure<V> ncurry(int n, final Object argument) {
         return ncurry(n, new Object[]{argument});
+    }
+
+    public ClosureCurried curried() {
+        return new ClosureCurried(this);
+    }
+
+    public ClosureCurried curried(Object... args) {
+        return new ClosureCurried(this.curry(args));
     }
 
     /**

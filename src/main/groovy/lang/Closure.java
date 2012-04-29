@@ -615,10 +615,65 @@ public abstract class Closure<V> extends GroovyObjectSupport implements Cloneabl
         return ncurry(n, new Object[]{argument});
     }
 
+    /**
+     * Returns a Closure that takes multiple arguments is such a way that it can
+     * be called as a chain of closures, each with a single argument. <p>
+     *
+     * For example:
+     * <pre>
+     * { a, b, c -> a + b + c }.curried() </pre>
+     * transforms the Closure into:
+     * <pre>
+     * { a -> { b -> { c -> a + b + c }}}
+     * </pre>
+     *
+     * Note that this is distinct from partial application (<code>curry()</code>):
+     * <pre>
+     * def cl = { a, b, c -> a + b + c }
+     *
+     * assert cl.curry(1)(2, 3) == 6 // 1 is partially applied
+     *
+     * // fails with message: no signature of method doCall() is applicable...
+     * // cl.curried(1)(2, 3) // cannot apply more that one argument!
+     * </pre>
+     *
+     * Examples of usage:
+     * <pre class="groovyTestCase">
+     * def adder = { a, b, c, d, e -> a + b + c + d + e }
+     *
+     * def sentence = "all work and no play"
+     * def s = sentence.tokenize().inject(adder.curried()) { join, word -> join(word) }
+     * assert s == sentence.replace(' ', '')
+     *
+     * def numbers = 3..7
+     * def recurSum = { add, nums ->
+     *     nums ? call(add(nums.head()), nums.tail()) : add
+     * }
+     * assert recurSum(adder.curried(), numbers) == numbers.sum()
+     * </pre>
+     *
+     * Closure that is curried can also be uncurried:
+     * <pre>
+     * def cl = { a, b, c -> a + b + c }
+     * assert cl.curried().uncurried()(1, 2, 3) == cl(1, 2, 3)
+     * </pre>
+     *
+     * @return the new, curried closure
+     * @see #curry(Object...)
+     * @see org.codehaus.groovy.runtime.ClosureCurried#uncurried()
+     */
     public ClosureCurried curried() {
         return new ClosureCurried(this);
     }
 
+    /**
+     * Returns the curried closure with partially applied arguments.
+     * The arguments are bound to the Closure which is then curried.
+     *
+     * @param args the arguments that are bound to the closure before it is curried
+     * @return the new, curried closure
+     * @see #curried()
+     */
     public ClosureCurried curried(Object... args) {
         return new ClosureCurried(this.curry(args));
     }

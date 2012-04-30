@@ -58,4 +58,11 @@ class ClosureCurriedTest extends GroovyTestCase {
         assert c6.curried(1, 2).uncurried()()() == 3
     }
 
+    void testIrregularCases() {
+        shouldFail(MissingMethodException) { c1.uncurried() }
+        shouldFail(IllegalArgumentException) { c1.curried(1, 2, 3, 4) }
+        shouldFail(MissingMethodException) { c1.curried().uncurried()(1, 2, 3, 4) }
+        shouldFail(MissingMethodException) { c1.curried()(1)(2)(3)(4) }
+        shouldFail(MissingMethodException) { c1.curried(1)(2).uncurried(3, 4) }
+    }
 }
